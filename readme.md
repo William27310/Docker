@@ -121,4 +121,66 @@ db = Serveur MySQL = Port 3306, nom db dans le réseau Docker
 
 phpmyadmin = Interface graphique pour gérer MySQL = http://localhost:8081
 
-==
+========================================
+
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: php-apache-Docker
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    container_name: mysql-db-Docker
+    restart: no
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: projetdb
+      MYSQL_USER: docker
+      MYSQL_PASSWORD: docker
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin-Docker
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "8081:80"
+
+volumes:
+  db_data:
+
+========================================
+
+FROM php:8.2-apache
+
+# Installer extensions PHP utiles
+RUN docker-php-ext-install mysqli pdo pdo_mysql
+
+# Activer mod_rewrite
+RUN a2enmod rewrite
+
+# Définir le bon DocumentRoot
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+
+# Appliquer le changement de DocumentRoot dans Apache
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/000-default.conf
+
+# Copier tout le contenu du projet dans le conteneur
+COPY . /var/www/html/
+
+========================================
