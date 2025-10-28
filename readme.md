@@ -149,46 +149,49 @@ phpmyadmin = Interface graphique pour gérer MySQL = http://localhost:8081
 
 ========================================
 
-version: '3.8'
+version: '3.9'
 
 services:
   web:
     build: .
-    container_name: php-apache-Docker
+    container_name: php-apache
     ports:
-      - "8080:80"
+      - "8080:80"   # Apache accessible sur localhost:8080
     volumes:
-      - .:/var/www/html
+      - .:/var/www/html:cached   # Le "cached" accélère la lecture sur Mac/Windows
     depends_on:
       - db
+    restart: unless-stopped
 
   db:
-    image: mysql:8.0
-    container_name: mysql-db-Docker
-    restart: no
+    image: mysql:8
+    container_name: mysql-db
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: projetdb
-      MYSQL_USER: docker
-      MYSQL_PASSWORD: docker
-    volumes:
-      - db_data:/var/lib/mysql
+      MYSQL_DATABASE: ma_base
+      MYSQL_USER: utilisateur
+      MYSQL_PASSWORD: motdepasse
     ports:
       - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin-Docker
-    depends_on:
-      - db
+    container_name: phpmyadmin
+    restart: unless-stopped
     environment:
       PMA_HOST: db
-      MYSQL_ROOT_PASSWORD: rootpassword
+      PMA_PORT: 3306
     ports:
-      - "8081:80"
+      - "8081:80"   # Port changé pour éviter conflit
+    depends_on:
+      - db
 
 volumes:
   db_data:
+
 
 ========================================
 
