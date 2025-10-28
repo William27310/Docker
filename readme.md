@@ -1,3 +1,29 @@
+#1044 - Accès refusé pour l'utilisateur: 'docker'@'@%'. Base 'GMAO'
+
+docker exec -it mysql-db-Docker mysql -u root -p
+
+mdp = rootpassword
+
+Supprime l'utilisateur corrompu -> 
+
+DROP USER IF EXISTS 'docker'@'%';
+DROP USER IF EXISTS 'docker'@'localhost';
+
+Recrée l'utilisateur correctement ->
+
+CREATE USER 'docker'@'%' IDENTIFIED BY 'dockerpass';
+CREATE USER 'docker'@'localhost' IDENTIFIED BY 'dockerpass';
+
+Donne tous les droits sur la base sql GMAO ->
+
+GRANT ALL PRIVILEGES ON gmao.* TO 'docker'@'%';
+GRANT ALL PRIVILEGES ON gmao.* TO 'docker'@'localhost';
+FLUSH PRIVILEGES;
+
+Teste la connexion avec l’utilisateur docker ->
+
+docker exec -it mysql-db-Docker mysql -u docker -p gmao
+
 ========================================
 
 docker-compose.yml :
