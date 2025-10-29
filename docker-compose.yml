@@ -1,38 +1,44 @@
 services:
   web:
-    build: ./php
-    container_name: php-apache-Docker
+    build: .
+    container_name: php-apache-gmao
     ports:
-      - "8080:80"
+      - "8080:80" # Apache accessible sur localhost:8080
     volumes:
-      - ./src:/var/www/html
+      - ./:/var/www/html
     depends_on:
       - db
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=rootpassword
+      - MYSQL_DATABASE= < Insérer le nom de votre base de donnée >
+    restart: unless-stopped
 
   db:
-    image: mysql:8.0
-    container_name: mysql-db-Docker
-    restart: no
+    image: mysql:8
+    container_name: mysql-db-gmao
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: projetdb
-      MYSQL_USER: docker
-      MYSQL_PASSWORD: docker
-    volumes:
-      - db_data:/var/lib/mysql
+      MYSQL_DATABASE: < Insérer le nom de votre base de donnée >
     ports:
       - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql 
+      - ./db/init:/docker-entrypoint-initdb.d
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin-Docker
-    depends_on:
-      - db
+    container_name: phpmyadmin-gmao
+    restart: unless-stopped
     environment:
       PMA_HOST: db
-      MYSQL_ROOT_PASSWORD: rootpassword
+      PMA_PORT: 3306
     ports:
-      - "8081:80"
+      - "8081:80" # Port changé pour éviter conflit
+    depends_on:
+      - db
 
 volumes:
   db_data:
