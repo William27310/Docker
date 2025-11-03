@@ -1,7 +1,8 @@
 services:
   web:
     build: .
-    container_name: php-apache-gmao
+    image: php:8.2-apache
+    container_name: php-apache-test
     ports:
       - "8080:80" # Apache accessible sur localhost:8080
     volumes:
@@ -17,7 +18,7 @@ services:
 
   db:
     image: mysql:8
-    container_name: mysql-db-gmao
+    container_name: mysql-db-test
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
@@ -30,11 +31,12 @@ services:
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin-gmao
+    container_name: phpmyadmin-test
     restart: unless-stopped
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
+      UPLOAD_LIMIT: 64M 
     ports:
       - "8081:80" # Port changé pour éviter conflit
     depends_on:
